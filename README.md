@@ -6,5 +6,5 @@ cv2, and matplotlib libraries are installed.
 There are number of test images included in the repository. To select which one is loaded either comment/uncomment 
 the line reading in the image in main() ( img = cv2.imread('image.jpg') ) or change the name of the file. 
 
-So far the script can find clipping in the blacks and whites, crushed blacks, and lifted blacks. Determining split 
+So far the script can find clipping in the blacks and whites, crushed blacks, and lifted blacks. To find out how each one of these is done refer to the comments in the script under the appropriate function. Determining split 
 toning and getting a HSL(Hue Saturation and Luminance) distribution for an image are up next.

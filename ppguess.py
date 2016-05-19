@@ -23,6 +23,31 @@ def plotDiff(hist):
 	plt.xlim([0,256])
 	plt.show()
 
+def colorWheelPlot(colorHist):
+	# Plots color distribution on polar plot based on hue
+	#
+	# colorHist : histogram data for each hue value
+	
+	N = 360
+	bottom = 4
+	max_height = 4
+
+	theta = np.linspace(0.0, 2 * np.pi, N, endpoint=False)
+	radii = max_height*np.random.rand(N)
+	width = (2*np.pi) / N
+
+	ax = plt.subplot(111, polar=True)
+	bars = ax.bar(theta, radii, width=width, bottom=bottom)
+	plt.axis('off')
+
+	i=0
+	for r, bar in zip(radii, bars):
+	    bar.set_facecolor(plt.cm.hsv(i))
+	    i=i+1
+	    bar.set_edgecolor('none')
+
+
+	plt.show()
 
 def histValues(img):
 	# Creates histogram array data for each channel and a total 

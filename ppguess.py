@@ -1,6 +1,12 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+import colorsys
+
+
+###########################################################################################
+###########   PLOTTING FUNCTIONS  #########################################################
+###########################################################################################
 
 def plotHist(hist):
 	# Plots histogram of given histogram array data
@@ -32,8 +38,12 @@ def colorWheelPlot(colorHist):
 	bottom = 4
 	max_height = 4
 
+	#normalize colorHist data
+	maxVal = max(colorHist)
+	colorHist = colorHist/float(maxVal)
+
 	theta = np.linspace(0.0, 2 * np.pi, N, endpoint=False)
-	radii = max_height*np.random.rand(N)
+	radii = max_height*colorHist
 	width = (2*np.pi) / N
 
 	ax = plt.subplot(111, polar=True)
@@ -48,6 +58,10 @@ def colorWheelPlot(colorHist):
 
 
 	plt.show()
+
+###########################################################################################
+###########   DATA CREATION AND CONVERSION  ###############################################
+###########################################################################################
 
 def histValues(img):
 	# Creates histogram array data for each channel and a total 
@@ -72,6 +86,56 @@ def histToArray(hist):
 		arr.append(item[0])
 	return arr
 
+def hsvData(img, height, width):
+	# Creates HSV data from an image
+	#
+	# img : image array (cv2.imread*())
+
+	#initalize lists for Hue, Saturation, and Value
+	Hue = []
+	Sat = []
+	Val = []
+	for i in range(0,height):
+		for j in range(0,width):
+			#normalize r,g,b values for conversion function
+			r = img[i,j,0] / float(255)
+			g = img[i,j,1] / float(255)
+			b = img[i,j,2] / float(255)
+
+			h, s, v = colorsys.rgb_to_hsv(r,g,b)
+
+			#unnormalize h,s,v values , round to nearest integer, and append to appropriate list
+			Hue.append(int(round(h*360)))
+			Sat.append(int(round(s*100)))
+			Val.append(int(round(v*100)))
+
+	#initialize lists histogram data
+	HueHist = np.zeros(360, dtype = np.int)
+	SatHist = np.zeros(100, dtype = np.int)
+	ValHist = np.zeros(100, dtype = np.int)
+
+	#populate histogram lists
+	for k in Hue:
+		HueHist[k]+=1
+
+	for l in Sat:
+		SatHist[l]+=1
+
+	for m in Val:
+		ValHist[m]+=1
+	
+
+	return HueHist, SatHist, ValHist
+
+
+		
+			
+
+
+
+###########################################################################################
+###########   PREDICTION FUNCTIONS  #######################################################
+###########################################################################################
 
 def clipped(hist, totalPix):
 	# Determines if there is whites or blacks are clipping
@@ -121,34 +185,36 @@ def crushed(hist):
 		print("crushed blacks")
 	
 
+###########################################################################################
+###########   MAIN PROGRAM  ###############################################################
+###########################################################################################
 
 def main():
 	# read in image
-	#img = cv2.imread('lifted.jpg')
-	#img = cv2.imread('crushed.jpg')
-	#img = cv2.imread('crushed_lifted.jpg')
-	img = cv2.imread('clipped_blacks.jpg')
-	#img = cv2.imread('test.jpg')
+	img = cv2.imread('colorTest.jpg')
 
-	#img = cv2.imread('blue_shad_st.jpg')
-	#img = cv2.imread('orange_high_st.jpg')
-	#img = cv2.imread('control.jpg')
 
 	# create histogram data
 	hist = histValues(img)
 
+
 	# find image information
-	h, w, c = img.shape
+	height, width, channels = img.shape
 
 	# determine total number of pixels, multiply by number of channels 
 	#     multiply by number of channels because this is used to set threshold
 	#     in fucntions using total data with is the total of all 3 channels
-	totalPix = h * w * c
+	totalPix = height * width * channels
 
 	#plot histogram data
-	plotHist(hist)
-	plotDiff(hist)
+	#plotHist(hist)
+	#plotDiff(hist)
 
+	#plot color wheel
+	HueHist, SatHist, ValHist = hsvData(img, height, width)
+	colorWheelPlot(HueHist)
+	colorWheelPlot(SatHist)
+	colorWheelPlot(ValHist)
 	#determine if there is clipping or not
 	clipped(hist, totalPix)
 

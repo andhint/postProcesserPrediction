@@ -86,15 +86,15 @@ def histToArray(hist):
 		arr.append(item[0])
 	return arr
 
-def hsvData(img, height, width):
+def hsvData(img):
 	# Creates HSV data from an image
 	#
 	# img : image array (cv2.imread*())
 
-	#initalize lists for Hue, Saturation, and Value
-	Hue = []
-	Sat = []
-	Val = []
+	#create copy of img to fill with hsv data
+	hsvImg = img
+	height, width, channels = img.shape
+
 	for i in range(0,height):
 		for j in range(0,width):
 			#normalize r,g,b values for conversion function
@@ -104,34 +104,10 @@ def hsvData(img, height, width):
 
 			h, s, v = colorsys.rgb_to_hsv(r,g,b)
 
-			#unnormalize h,s,v values , round to nearest integer, and append to appropriate list
-			Hue.append(int(round(h*360)))
-			Sat.append(int(round(s*100)))
-			Val.append(int(round(v*100)))
-
-	#initialize lists histogram data
-	HueHist = np.zeros(360, dtype = np.int)
-	SatHist = np.zeros(100, dtype = np.int)
-	ValHist = np.zeros(100, dtype = np.int)
-
-	#populate histogram lists
-	for k in Hue:
-		HueHist[k]+=1
-
-	for l in Sat:
-		SatHist[l]+=1
-
-	for m in Val:
-		ValHist[m]+=1
-	
-
-	return HueHist, SatHist, ValHist
-
-
+			#unnormalize h,s,v values , round to nearest integer, and write to copied image
+			hsvImg[i,j] = [int(round(h*360)) , int(round(s*100)) , int(round(v*100))]
 		
-			
-
-
+	return hsvImg
 
 ###########################################################################################
 ###########   PREDICTION FUNCTIONS  #######################################################
@@ -192,8 +168,7 @@ def crushed(hist):
 def main():
 	# read in image
 	img = cv2.imread('colorTest.jpg')
-
-
+	
 	# create histogram data
 	hist = histValues(img)
 
@@ -211,10 +186,8 @@ def main():
 	#plotDiff(hist)
 
 	#plot color wheel
-	HueHist, SatHist, ValHist = hsvData(img, height, width)
-	colorWheelPlot(HueHist)
-	colorWheelPlot(SatHist)
-	colorWheelPlot(ValHist)
+	hsvImg = hsvData(img)
+	print(hsvImg)
 	#determine if there is clipping or not
 	clipped(hist, totalPix)
 
